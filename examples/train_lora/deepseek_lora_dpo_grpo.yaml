@@ -1,0 +1,58 @@
+### model  
+model_name_or_path: /lustre/huangyk/model_down/DeepSeek-R1-Distill-Qwen-32B  
+trust_remote_code: true  
+#quantization_bit: 4  
+  
+### method  
+stage: dpo  
+do_train: true  
+finetuning_type: lora  
+lora_rank: 8  
+lora_target: all  
+#lora_target: ["q_proj","v_proj"]  
+pref_beta: 0.1  
+pref_loss: grpo  # Changed from sigmoid to grpo  
+use_reasoning_quality: true  # Added to enable reasoning quality evaluation  
+reasoning_weight: 0.3  # Added to control the weight of reasoning quality rewards  
+format_weight: 0.3  # Added for format reward component  
+cosine_weight: 0.3  # Added for cosine reward component  
+cosine_min_len_value_wrong: -0.5  # Added for cosine reward parameters  
+cosine_max_len_value_wrong: 0.0  # Added for cosine reward parameters  
+cosine_min_len_value_correct: 1.0  # Added for cosine reward parameters  
+cosine_max_len_value_correct: 0.5  # Added for cosine reward parameters  
+cosine_max_len: 10000  # Added, matching your cutoff_len  
+use_unsloth: false  
+use_galore: false  
+flash_attn: auto  
+deepspeed: examples/deepspeed/ds_z3_DS.json  
+  
+### dataset  
+dataset: dpo_zh_stage2  
+template: qwen  
+cutoff_len: 20000  
+max_samples: 30000  
+overwrite_cache: true  
+preprocessing_num_workers: 16  
+  
+### output  
+output_dir: saves/DS_0509/lora/dpo_grpo  # Changed to indicate GRPO usage  
+logging_steps: 1  
+save_total_limit: 8  
+save_strategy: epoch  
+plot_loss: true  
+overwrite_output_dir: true  
+save_only_model: false  
+report_to: none  # choices: [none, wandb, tensorboard, swanlab, mlflow]  
+  
+### train  
+per_device_train_batch_size: 1  
+gradient_accumulation_steps: 2  
+learning_rate: 5.0e-6  
+num_train_epochs: 8.0  
+lr_scheduler_type: cosine  
+warmup_ratio: 0.1  
+bf16: true  
+ddp_timeout: 180000000  
+resume_from_checkpoint: null  
+optim: paged_adamw_32bit  
+gradient_checkpointing: true  
